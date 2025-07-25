@@ -1,28 +1,33 @@
 from app import app
 from models import *
-
+from schemas import CustomerSchema, ItemSchema, ReviewSchema
 
 def test_customer_is_serializable(test_client):
     '''customer is serializable'''
     c = Customer(name='Phil')
-    db.session.add(c)
+    i = Item(name='Insulated Mug', price=9.99)
+    db.session.add_all([c, i])
     db.session.commit()
-    r = Review(comment='great!', customer=c)
+
+    r = Review(comment='great!', customer=c, item=i)
     db.session.add(r)
     db.session.commit()
+
     customer_dict = CustomerSchema().dump(c)
 
     assert customer_dict['id']
     assert customer_dict['name'] == 'Phil'
     assert customer_dict['reviews']
-    assert 'customer' not in customer_dict['reviews']
+    assert 'customer' not in customer_dict['reviews'][0]
 
 def test_item_is_serializable(test_client):
     '''item is serializable'''
     i = Item(name='Insulated Mug', price=9.99)
-    db.session.add(i)
+    c = Customer(name='Phil')
+    db.session.add_all([i, c])
     db.session.commit()
-    r = Review(comment='great!', item=i)
+
+    r = Review(comment='great!', item=i, customer=c)
     db.session.add(r)
     db.session.commit()
 
@@ -31,12 +36,12 @@ def test_item_is_serializable(test_client):
     assert item_dict['name'] == 'Insulated Mug'
     assert item_dict['price'] == 9.99
     assert item_dict['reviews']
-    assert 'item' not in item_dict['reviews']
+    assert 'item' not in item_dict['reviews'][0]
 
 def test_review_is_serializable(test_client):
     '''review is serializable'''
-    c = Customer()
-    i = Item()
+    c = Customer(name='Phil')
+    i = Item(name='Insulated Mug', price=9.99)
     db.session.add_all([c, i])
     db.session.commit()
 

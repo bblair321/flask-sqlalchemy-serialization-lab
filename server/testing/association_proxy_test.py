@@ -3,8 +3,8 @@ from models import *
 
 def test_has_association_proxy(test_client):
     '''has association proxy to items'''
-    c = Customer()
-    i = Item()
+    c = Customer(name='Test Customer')
+    i = Item(name='Test Item', price=9.99)
     db.session.add_all([c, i])
     db.session.commit()
 
